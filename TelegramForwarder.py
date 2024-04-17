@@ -30,7 +30,7 @@ class TelegramForwarder:
 
         print("List of groups printed successfully!")
 
-    async def forward_messages_to_channel(self, source_chat_id, destination_channel_id, keywords):
+    async def forward_messages_to_channel(self, source_chat_id, destination_channel_id, keywords = None):
         await self.client.connect()
 
         # Ensure you're authorized
@@ -89,6 +89,26 @@ def write_credentials(api_id, api_hash, phone_number):
         file.write(api_hash + "\n")
         file.write(phone_number + "\n")
 
+# Function to read message_forward from file
+def read_message_forward():
+    try:
+        with open("message_forward.txt", "r") as file:
+            lines = file.readlines()
+            source_chat_id = int(lines[0].strip())
+            destination_channel_id = int(lines[1].strip())
+            # keywords = (lines[2].strip()).split(",")
+            return source_chat_id, destination_channel_id
+    except FileNotFoundError:
+        print("message forward file not found.")
+        return None, None, None
+
+# Function to write message_forward to file
+def write_message_forward(source_chat_id, destination_channel_id, keywords=None):
+    with open("message_forward.txt", "w") as file:
+        file.write(source_chat_id + "\n")
+        file.write(destination_channel_id + "\n")
+        # file.write(keywords + "\n")
+
 async def main():
     # Attempt to read credentials from file
     api_id, api_hash, phone_number = read_credentials()
@@ -103,23 +123,28 @@ async def main():
 
     forwarder = TelegramForwarder(api_id, api_hash, phone_number)
     
-    print("Choose an option:")
-    print("1. List Chats")
-    print("2. Forward Messages")
+    # print("Choose an option:")
+    # print("1. List Chats")
+    # print("2. Forward Messages")
     
-    choice = input("Enter your choice: ")
+    # choice = input("Enter your choice: ")
     
-    if choice == "1":
-        await forwarder.list_chats()
-    elif choice == "2":
-        source_chat_id = int(input("Enter the source chat ID: "))
-        destination_channel_id = int(input("Enter the destination chat ID: "))
+    # if choice == "1":
+    #     await forwarder.list_chats()
+    # elif choice == "2":
+        # Attempt to read credentials from file
+    source_chat_id, destination_channel_id  = read_message_forward()
+    
+    # If credentials not found in file, prompt the user to input them
+    if source_chat_id is None or destination_channel_id is None:
+        source_chat_id = (input("Enter the source chat ID: "))
+        destination_channel_id = (input("Enter the destination chat ID: "))
         print("Enter keywords if you want to forward messages with specific keywords, or leave blank to forward every message!")
-        keywords = input("Put keywords (comma separated if multiple, or leave blank): ").split(",")
-        
-        await forwarder.forward_messages_to_channel(source_chat_id, destination_channel_id, keywords)
-    else:
-        print("Invalid choice")
+        keywords = input("Put keywords (comma separated if multiple, or leave blank): ")
+        write_message_forward(source_chat_id, destination_channel_id)
+    await forwarder.forward_messages_to_channel(source_chat_id, destination_channel_id)
+    # else:
+    #     print("Invalid choice")
 
 # Start the event loop and run the main function
 if __name__ == "__main__":
