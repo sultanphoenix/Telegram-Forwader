@@ -1,0 +1,25 @@
+name: Python Script Execution
+
+on:
+  push:
+    branches:
+      - main  # Adjust branch name as needed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'  # Specify your Python version
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt  # If you have any dependencies, otherwise remove this step
+
+    - name: Run Python script
+      run: python TelegramForwarder.py  # Replace 'my_script.py' with your script name
